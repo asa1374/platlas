@@ -6,6 +6,7 @@ from app.db.models.platform import (
     platform_related_platforms,
     platform_tags,
 )
+from app.db.models.submission import Submission, SubmissionStatus
 
 __all__ = [
     "Platform",
@@ -14,4 +15,6 @@ __all__ = [
     "platform_categories",
     "platform_related_platforms",
     "platform_tags",
+    "Submission",
+    "SubmissionStatus",
 ]

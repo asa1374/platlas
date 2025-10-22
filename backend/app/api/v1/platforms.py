@@ -18,7 +18,7 @@ from app.schemas.platform import (
     PlatformUpdate,
     TagRef,
 )
-from app.core.slugs import slugify
+from app.services.platforms import generate_unique_slug
 
 router = APIRouter(prefix="/platforms", tags=["platforms"])
 
@@ -100,7 +100,7 @@ def create_platform(payload: PlatformCreate, db: Session = Depends(get_db)) -> A
     categories = _load_categories(db, payload.category_ids)
     tags = _load_tags(db, payload.tag_ids)
     related_platforms = _load_related_platforms(db, payload.related_platform_ids)
-    slug = _generate_unique_slug(db, payload.name)
+    slug = generate_unique_slug(db, payload.name)
 
     links = payload.links or PlatformLinks()
 
@@ -132,7 +132,7 @@ def update_platform(
 
     if payload.name is not None:
         if payload.name != platform.name:
-            platform.slug = _generate_unique_slug(db, payload.name, current_id=platform.id)
+            platform.slug = generate_unique_slug(db, payload.name, current_id=platform.id)
         platform.name = payload.name
     if payload.description is not None:
         platform.description = payload.description
@@ -263,18 +263,3 @@ def _get_platform_by_slug_or_404(db: Session, slug: str) -> Platform:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Platform not found")
     return platform
 
-
-def _generate_unique_slug(db: Session, name: str, current_id: Optional[int] = None) -> str:
-    base_slug = slugify(name)
-    slug_candidate = base_slug
-    index = 1
-
-    while True:
-        stmt = select(Platform.id).where(Platform.slug == slug_candidate)
-        if current_id is not None:
-            stmt = stmt.where(Platform.id != current_id)
-        exists = db.execute(stmt).scalar_one_or_none()
-        if exists is None:
-            return slug_candidate
-        index += 1
-        slug_candidate = f"{base_slug}-{index}"
