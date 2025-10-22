@@ -4,11 +4,22 @@ from app.api.v1 import api_router
 from app.core.config import get_settings
 from app.middleware.error_handling import ExceptionHandlingMiddleware
 from app.schemas.common import ApiResponse
+from app.services.analytics import analytics
 
 settings = get_settings()
 
 app = FastAPI(title=settings.app_name, debug=settings.debug)
 app.add_middleware(ExceptionHandlingMiddleware)
+
+
+@app.on_event("startup")
+async def startup_event() -> None:
+    await analytics.start()
+
+
+@app.on_event("shutdown")
+async def shutdown_event() -> None:
+    await analytics.shutdown()
 
 
 @app.get("/health", response_model=ApiResponse[str])

@@ -63,6 +63,40 @@ export interface PlatformListQuery {
   pageSize?: number;
 }
 
+export interface CollectionMetrics {
+  views: number;
+  clicks: number;
+  trending_score: number;
+}
+
+export interface Collection {
+  id: number;
+  slug: string;
+  title: string;
+  description?: string | null;
+  highlight?: string | null;
+  cover_image_url?: string | null;
+  is_public: boolean;
+  is_featured: boolean;
+  display_order: number;
+  trending_score: number;
+  published_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  platforms: PlatformSummary[];
+  metrics: CollectionMetrics;
+}
+
+export interface CollectionsResponse extends ApiResponse<Collection[]> {}
+
+export interface CollectionDetailResponse extends ApiResponse<Collection> {}
+
+export interface CollectionListQuery {
+  onlyPublic?: boolean;
+  featured?: boolean;
+  limit?: number;
+}
+
 export async function fetchPlatforms(query: PlatformListQuery): Promise<PlatformsResponse> {
   const params = new URLSearchParams();
   if (query.search) {
@@ -102,4 +136,43 @@ export async function fetchPlatformDetail(slug: string): Promise<PlatformDetailR
   }
 
   return (await response.json()) as PlatformDetailResponse;
+}
+
+export async function fetchCollections(query: CollectionListQuery = {}): Promise<CollectionsResponse> {
+  const params = new URLSearchParams();
+  if (query.onlyPublic === false) {
+    params.set("only_public", "false");
+  }
+  if (typeof query.featured === "boolean") {
+    params.set("featured", String(query.featured));
+  }
+  if (typeof query.limit === "number") {
+    params.set("limit", String(query.limit));
+  }
+
+  const queryString = params.toString();
+  const response = await fetch(
+    `${API_BASE_URL}/collections${queryString ? `?${queryString}` : ""}`,
+    {
+      next: { revalidate: 0 }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("컬렉션 정보를 불러오지 못했습니다.");
+  }
+
+  return (await response.json()) as CollectionsResponse;
+}
+
+export async function fetchCollectionDetail(slug: string): Promise<CollectionDetailResponse> {
+  const response = await fetch(`${API_BASE_URL}/collections/${slug}`, {
+    next: { revalidate: 0 }
+  });
+
+  if (!response.ok) {
+    throw new Error("컬렉션 정보를 불러오지 못했습니다.");
+  }
+
+  return (await response.json()) as CollectionDetailResponse;
 }

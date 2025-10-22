@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="flex min-h-screen flex-col">
             <header className="border-b bg-card/60 backdrop-blur">
               <div className="container flex items-center justify-between py-4">
-                <Link href="/platforms" className="text-lg font-semibold tracking-tight">
+                <Link href="/" className="text-lg font-semibold tracking-tight">
                   platlas
                 </Link>
                 <span className="text-sm text-muted-foreground">플랫폼 인사이트 허브</span>
