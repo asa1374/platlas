@@ -1,3 +1,9 @@
+from app.db.models.collection import (
+    Collection,
+    CollectionPlatform,
+    MetricEntityType,
+    MetricsDaily,
+)
 from app.db.models.platform import (
     Category,
     Platform,
@@ -9,6 +15,10 @@ from app.db.models.platform import (
 from app.db.models.submission import Submission, SubmissionStatus
 
 __all__ = [
+    "Collection",
+    "CollectionPlatform",
+    "MetricEntityType",
+    "MetricsDaily",
     "Platform",
     "Category",
     "Tag",
